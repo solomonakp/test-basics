@@ -14,7 +14,7 @@
     "use-debounce": "^3.4.3"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --watch",
     "dev": "concurrently -i -k npm:dev:client npm:dev:server",
     "dev:server": "node api/index.js",
     "dev:client": "parcel src/index.html --port 3000",
