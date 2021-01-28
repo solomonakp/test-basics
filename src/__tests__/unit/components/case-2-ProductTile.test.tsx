@@ -1,6 +1,6 @@
 import React from 'react'
 import { axe } from 'jest-axe'
-import { getAllByText, queryByAltText, render } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import ProductTile from '../../../components/ProductTile'
 
 const defaultProduct = {

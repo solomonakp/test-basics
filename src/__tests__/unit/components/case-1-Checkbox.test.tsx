@@ -43,7 +43,6 @@ describe('The <Checkbox /> component', () => {
    const checkbox = getByLabelText(label)
    //  fire click event on checkbox 
    fireEvent.click(checkbox)
-   //  asseting 
    expect(onChange).toHaveBeenCalledTimes(1)
 
     
