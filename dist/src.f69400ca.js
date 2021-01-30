@@ -324,7 +324,7 @@ checkPropTypes.resetWarningCache = function () {
 
 module.exports = checkPropTypes;
 },{"./lib/ReactPropTypesSecret":"../node_modules/prop-types/lib/ReactPropTypesSecret.js"}],"../node_modules/react/cjs/react.development.js":[function(require,module,exports) {
-/** @license React v16.13.1
+/** @license React v16.14.0
  * react.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -342,7 +342,7 @@ if ("development" !== "production") {
 
     var checkPropTypes = require('prop-types/checkPropTypes');
 
-    var ReactVersion = '16.13.1'; // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
+    var ReactVersion = '16.14.0'; // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
     // nor polyfill, then a plain number is used for performance.
 
     var hasSymbol = typeof Symbol === 'function' && Symbol.for;
@@ -3428,7 +3428,7 @@ if ("development" === 'production') {
   module.exports = require('./cjs/scheduler-tracing.development.js');
 }
 },{"./cjs/scheduler-tracing.development.js":"../node_modules/scheduler/cjs/scheduler-tracing.development.js"}],"../node_modules/react-dom/cjs/react-dom.development.js":[function(require,module,exports) {
-/** @license React v16.13.1
+/** @license React v16.14.0
  * react-dom.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -28166,7 +28166,7 @@ if ("development" !== "production") {
       };
     }
 
-    var ReactVersion = '16.13.1';
+    var ReactVersion = '16.14.0';
     setAttemptUserBlockingHydration(attemptUserBlockingHydration$1);
     setAttemptContinuousHydration(attemptContinuousHydration$1);
     setAttemptHydrationAtCurrentPriority(attemptHydrationAtCurrentPriority$1);
@@ -37779,7 +37779,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54746" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55251" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

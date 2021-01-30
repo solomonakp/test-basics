@@ -6,6 +6,7 @@ const useOutsideClick: <Element>(
   handleOutsideClick: (event: DocumentEventMap['click']) => void,
 ) => void = (elementRef, handleOutsideClick) => {
   useEffect(() => {
+    // click event handler
     const clickEventListener = (event: DocumentEventMap['click']) => {
       if (!elementContains(elementRef.current, event.target)) {
         handleOutsideClick(event)
