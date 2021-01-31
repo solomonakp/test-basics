@@ -12,9 +12,9 @@ const useOutsideClick: <Element>(
         handleOutsideClick(event)
       }
     }
-
+    // mounting click to dom
     document.addEventListener('click', clickEventListener, true)
-
+    // remove while unmounting
     return () => document.removeEventListener('click', clickEventListener, true)
   }, [elementRef, handleOutsideClick])
 }

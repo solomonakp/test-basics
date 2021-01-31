@@ -35649,13 +35649,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var useOutsideClick = function useOutsideClick(elementRef, handleOutsideClick) {
   (0, _react.useEffect)(function () {
+    // click event handler
     var clickEventListener = function clickEventListener(event) {
       if (!(0, _document.default)(elementRef.current, event.target)) {
         handleOutsideClick(event);
       }
-    };
+    }; // mounting click to dom
 
-    document.addEventListener('click', clickEventListener, true);
+
+    document.addEventListener('click', clickEventListener, true); // remove while unmounting
+
     return function () {
       return document.removeEventListener('click', clickEventListener, true);
     };
@@ -37779,7 +37782,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55251" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49850" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
