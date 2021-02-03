@@ -3,9 +3,11 @@ import { Axios } from '../../helpers/axios'
 import {
   render,
   fireEvent,
+  screen,
   act,
-  waitFor,
   waitForElementToBeRemoved,
+  waitFor,
+  getByTestId,
 } from '@testing-library/react'
 import { Provider as StoreProvider } from 'react-redux'
 import { build, fake } from '@jackfranklin/test-data-bot'
@@ -31,13 +33,46 @@ describe('The app ', () => {
   })
 
   test('it can open and close the filters panel', async () => {
-    const { container, queryByTestId } = setUpApp()
+    const { queryByTestId } = setUpApp()
     const btn = queryByTestId('FilterButton')
     fireEvent.click(btn)
+    await waitFor(() => {
+      expect(queryByTestId('CloseCanvas')).toBeInTheDocument()
+    })
     expect(queryByTestId('CloseCanvas')).toBeInTheDocument()
-    fireEvent.click(container)
-    expect(queryByTestId('CloseCanvas')).toBeNull()
+    fireEvent.click(queryByTestId('CloseCanvas'))
+    await waitFor(() => {
+      expect(queryByTestId('CloseCanvas')).not.toBeInTheDocument()
+    })
   })
 
-  test('❌ it can search products as user types in the search field', async () => {})
+  test('it can search products as user types in the search field', async () => {
+    // set up app
+    const {
+      queryByTestId,
+      findByPlaceholderText,
+      queryByPlaceholderText,
+      findByTestId,
+    } = setUpApp()
+    const searchValue = 'mexx'
+    fireEvent.click(queryByTestId('FilterButton'))
+    const searchBox = await findByPlaceholderText('largo')
+    fireEvent.change(searchBox, {
+      target: {
+        value: searchValue,
+      },
+    })
+    const viewResult = await findByTestId('ViewResultsButton')
+    fireEvent.click(viewResult)
+    // await waitFor(() => {
+    //   debug(queryByPlaceholderText('largo'))
+    // })
+    // click button
+    // find textbox
+    // type value
+    // assert that value typed is the value of the textbox
+    // click on view result
+    // expect product to be the product you typed
+    // if wrong product expect to get empty product
+  })
 })
