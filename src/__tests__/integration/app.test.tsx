@@ -1,14 +1,12 @@
 import React from 'react'
 import { Axios } from '../../helpers/axios'
-import { render, fireEvent, waitFor } from '@testing-library/react'
+import { render, fireEvent, waitFor, act } from '@testing-library/react'
 import { Provider as StoreProvider } from 'react-redux'
 import { build, fake } from '@jackfranklin/test-data-bot'
 
 import App from '../../components/App'
 import { createStore } from '../../store'
 import { FiltersWrapper } from '../../components/FiltersWrapper'
-import { notDeepEqual } from 'assert'
-
 jest.mock('../../helpers/axios')
 
 const mockedAxios = Axios as any
@@ -32,10 +30,15 @@ const buildProduct = build('Product', {
     isActive: fake((f) => true),
   },
 })
+beforeEach(() => {
+  jest.useFakeTimers()
+})
+afterEach(() => {
+  jest.clearAllMocks()
+})
 describe('The app ', () => {
-  const products = [buildProduct(), buildProduct(), buildProduct()]
-
   test('it fetches and renders all products on the page', async () => {
+    const products = [buildProduct(), buildProduct(), buildProduct()]
     mockedAxios.get.mockResolvedValue({ data: products })
     const { findAllByTestId } = setUpApp()
     const product = await findAllByTestId('ProductTile')
@@ -57,24 +60,35 @@ describe('The app ', () => {
   })
 
   test('it can search products as user types in the search field', async () => {
-    // const {
-    //   queryByTestId,
-    //   findByPlaceholderText,
-    //   findByTestId,
-    //   queryAllByTestId,
-    // } = setUpApp()
-    // const searchValue = 'mexx'
-    // fireEvent.click(queryByTestId('FilterButton'))
-    // const searchBox = await findByPlaceholderText('largo')
-    // fireEvent.change(searchBox, {
-    //   target: {
-    //     value: searchValue,
-    //   },
-    // })
-    // const viewResult = await findByTestId('ViewResultsButton')
-    // fireEvent.click(viewResult)
-    // await waitFor(() => {
-    //   expect(queryAllByTestId('ProductTile')).toHaveLength(1)
-    // })
+    mockedAxios.get
+      .mockResolvedValueOnce({
+        data: [buildProduct(), buildProduct(), buildProduct()],
+      })
+      .mockResolvedValueOnce({
+        data: [buildProduct(), buildProduct()],
+      })
+    const { findByPlaceholderText, queryAllByTestId, getByText } = setUpApp()
+    await waitFor(() => {
+      expect(queryAllByTestId('ProductTile')).toHaveLength(3)
+    })
+    fireEvent.click(getByText(/filter/i))
+    const searchBox = await findByPlaceholderText('largo')
+    fireEvent.change(searchBox, {
+      target: {
+        value: 'mexx',
+      },
+    })
+    act(() => {
+      jest.runAllTimers()
+    })
+
+    await waitFor(() => {
+      expect(mockedAxios.get).toHaveBeenCalledTimes(2)
+    })
+
+    fireEvent.click(getByText(/View results/i))
+    await waitFor(() => {
+      expect(queryAllByTestId('ProductTile')).toHaveLength(2)
+    })
   })
 })
