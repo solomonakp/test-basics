@@ -17,9 +17,11 @@ describe('The app ', () => {
   const setupApp = () =>
     render(
       <StoreProvider store={createStore()}>
-        <FiltersWrapper>
-          <App />
-        </FiltersWrapper>
+        <MemoryRouter>
+          <FiltersWrapper>
+            <App />
+          </FiltersWrapper>
+        </MemoryRouter>
       </StoreProvider>,
     )
 
@@ -53,7 +55,9 @@ describe('The app ', () => {
 
   test('it can search products as user types in the search field', async () => {
     jest.useFakeTimers()
+
     mockAxios.get
+      // call to get products
       .mockResolvedValueOnce({
         data: [
           productBuilder(),
@@ -63,12 +67,18 @@ describe('The app ', () => {
           productBuilder(),
         ],
       })
+      // call to cart
+      .mockResolvedValueOnce({
+        data: [productBuilder()],
+      })
+      // call when search happens
       .mockResolvedValueOnce({
         data: [productBuilder(), productBuilder()],
       })
     const { findAllByTestId, getByText, getByPlaceholderText } = setupApp()
+    // asserting prodoucts after cart call
 
-    expect(await findAllByTestId('ProductTile')).toHaveLength(5)
+    expect(await findAllByTestId('ProductTile')).toHaveLength(1)
 
     fireEvent.click(getByText(/filter/i))
 
@@ -83,8 +93,8 @@ describe('The app ', () => {
     act(() => {
       jest.runAllTimers()
     })
-
-    await waitFor(() => expect(mockAxios.get).toHaveBeenCalledTimes(2))
+    // total amount of calls
+    await waitFor(() => expect(mockAxios.get).toHaveBeenCalledTimes(3))
 
     expect(await findAllByTestId('ProductTile')).toHaveLength(2)
   })
