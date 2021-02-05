@@ -3,6 +3,7 @@ import { Axios } from '../../helpers/axios'
 import { render, fireEvent, act, waitFor } from '@testing-library/react'
 import { Provider as StoreProvider } from 'react-redux'
 import { productBuilder } from '../utils'
+import { MemoryRouter } from 'react-router-dom'
 
 import App from '../../components/App'
 import { createStore } from '../../store'
