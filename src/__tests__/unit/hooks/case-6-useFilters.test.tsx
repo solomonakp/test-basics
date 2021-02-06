@@ -1,21 +1,36 @@
 import React from 'react'
-import { render,fireEvent} from '@testing-library/react'
-
+import { render, fireEvent } from '@testing-library/react'
 import { useFilters } from '../../../hooks/useFilters'
 import { FiltersContext } from '../../../context/filters'
 
-const result = {} as any 
-const TestHook = (params) => {
- result.current = useFilters()
- const {toggleShowingFilters} = result.current
-  return null
-}
-const setUpHook = () => (render(<TestHook/>))
-
 describe('The useFilters hook', () => {
-  it('❌ returns the current value of the filters context', () => {
-    const {getByText,debug} = setUpHook()
-    const {current} = result 
-    expect(current.showingFilters).toBe(false)
+  const Panel = () => {
+    const { toggleShowingFilters } = useFilters()
+
+    return (
+      <div>
+        <button onClick={toggleShowingFilters}>click me</button>
+      </div>
+    )
+  }
+
+  it('returns the current value of the filters context', () => {
+    const toggleShowingFilters = jest.fn()
+
+    const { getByText } = render(
+      <FiltersContext.Provider
+        value={
+          {
+            toggleShowingFilters,
+          } as any
+        }
+      >
+        <Panel />
+      </FiltersContext.Provider>,
+    )
+
+    fireEvent.click(getByText(/click me/))
+
+    expect(toggleShowingFilters).toHaveBeenCalled()
   })
 })

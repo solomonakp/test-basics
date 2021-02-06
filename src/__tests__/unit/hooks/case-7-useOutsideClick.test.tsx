@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react'
 import { render, fireEvent } from '@testing-library/react'
 
 import useOutsideClick from '../../../hooks/useOutsideClick'
-import { exec } from 'child_process'
 
 describe('The useOutsideClick hook', () => {
   // This test is important if you are going to be creating libraries in future.

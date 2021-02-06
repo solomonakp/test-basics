@@ -2,6 +2,7 @@ import React from 'react'
 import { axe } from 'jest-axe'
 import { render } from '@testing-library/react'
 import ProductStream from '../../../components/ProductStream'
+import { MemoryRouter } from 'react-router'
 
 describe('The <ProductStream /> component', () => {
   const products = [
@@ -24,15 +25,22 @@ describe('The <ProductStream /> component', () => {
       isActive: true,
     },
   ]
-  
-  it('renders a list of Product tiles for each product passed to it',  () => {
-    const { queryAllByTestId} = render( <ProductStream products={products as any}/>) 
+
+  it('renders a list of Product tiles for each product passed to it', () => {
+    const { queryAllByTestId } = render(
+      <MemoryRouter>
+        <ProductStream products={products as any} />
+      </MemoryRouter>,
+    )
     expect(queryAllByTestId('ProductTile')).toHaveLength(products.length)
-  
   })
 
   it('has no accessibility violations', async () => {
-    const {container} = render( <ProductStream products={products as any}/>) 
+    const { container } = render(
+      <MemoryRouter>
+        <ProductStream products={products as any} />
+      </MemoryRouter>,
+    )
     const result = await axe(container)
     expect(result).toHaveNoViolations()
   })

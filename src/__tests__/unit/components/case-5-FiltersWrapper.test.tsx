@@ -1,8 +1,6 @@
 import React, { useContext } from 'react'
 import { render, fireEvent } from '@testing-library/react'
 
-import useFilters from '../../../hooks/useFilters'
-
 import { FiltersContext } from '../../../context/filters'
 import { FiltersWrapper } from '../../../components/FiltersWrapper'
 

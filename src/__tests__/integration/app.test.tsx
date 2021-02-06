@@ -2,7 +2,8 @@ import React from 'react'
 import { Axios } from '../../helpers/axios'
 import { render, fireEvent, waitFor, act } from '@testing-library/react'
 import { Provider as StoreProvider } from 'react-redux'
-import { build, fake } from '@jackfranklin/test-data-bot'
+import { buildProduct } from '../utils'
+import { MemoryRouter } from 'react-router-dom'
 
 import App from '../../components/App'
 import { createStore } from '../../store'
@@ -14,22 +15,14 @@ const mockedAxios = Axios as any
 const setUpApp = () =>
   render(
     <StoreProvider store={createStore()}>
-      <FiltersWrapper>
-        <App />
-      </FiltersWrapper>
+      <MemoryRouter>
+        <FiltersWrapper>
+          <App />
+        </FiltersWrapper>
+      </MemoryRouter>
     </StoreProvider>,
   )
-const buildProduct = build('Product', {
-  fields: {
-    id: fake((f) => f.random.number()),
-    name: fake((f) => f.lorem.words()),
-    image: fake((f) => f.image.imageUrl()),
-    price: fake((f) => `from $${f.random.number(100)}`),
-    brand: fake((f) => f.lorem.word()),
-    createdAt: fake((f) => f.date.recent()),
-    isActive: fake((f) => true),
-  },
-})
+
 beforeEach(() => {
   jest.useFakeTimers()
 })
@@ -65,11 +58,14 @@ describe('The app ', () => {
         data: [buildProduct(), buildProduct(), buildProduct()],
       })
       .mockResolvedValueOnce({
+        data: [buildProduct(), buildProduct(), buildProduct(), buildProduct()],
+      })
+      .mockResolvedValueOnce({
         data: [buildProduct(), buildProduct()],
       })
     const { findByPlaceholderText, queryAllByTestId, getByText } = setUpApp()
     await waitFor(() => {
-      expect(queryAllByTestId('ProductTile')).toHaveLength(3)
+      expect(queryAllByTestId('ProductTile')).toHaveLength(4)
     })
     fireEvent.click(getByText(/filter/i))
     const searchBox = await findByPlaceholderText('largo')
@@ -83,7 +79,7 @@ describe('The app ', () => {
     })
 
     await waitFor(() => {
-      expect(mockedAxios.get).toHaveBeenCalledTimes(2)
+      expect(mockedAxios.get).toHaveBeenCalledTimes(3)
     })
 
     fireEvent.click(getByText(/View results/i))
@@ -91,4 +87,11 @@ describe('The app ', () => {
       expect(queryAllByTestId('ProductTile')).toHaveLength(2)
     })
   })
+  test('❌it can navigate to the single product page', async () => {})
+
+  test('❌it can add a product to cart', async () => {})
+
+  test('❌it can remove a product from cart', async () => {})
+
+  test('❌it can go through and complete the checkout flow', async () => {})
 })
