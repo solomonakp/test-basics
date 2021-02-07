@@ -87,7 +87,15 @@ describe('The app ', () => {
       expect(queryAllByTestId('ProductTile')).toHaveLength(2)
     })
   })
-  test('❌it can navigate to the single product page', async () => {})
+  test('❌it can navigate to the single product page', async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: [buildProduct(), buildProduct(), buildProduct()],
+    })
+
+    const { findByTestId } = setUpApp()
+
+    await waitFor(() => {})
+  })
 
   test('❌it can add a product to cart', async () => {})
 
