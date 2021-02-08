@@ -9,14 +9,21 @@ import App from '../../components/App'
 import { createStore } from '../../store'
 import { FiltersWrapper } from '../../components/FiltersWrapper'
 import { build } from '@jackfranklin/test-data-bot'
+import { debug } from 'console'
+import { executionAsyncId } from 'async_hooks'
 jest.mock('../../helpers/axios')
 
 const mockedAxios = Axios as any
 
-const setUpApp = () =>
+const setUpApp = (
+  routerProps = {
+    initialEntries: ['/', 'products/:id'],
+    initialIndex: 0,
+  },
+) =>
   render(
     <StoreProvider store={createStore()}>
-      <MemoryRouter initialEntries={['/']}>
+      <MemoryRouter {...routerProps}>
         <FiltersWrapper>
           <App />
         </FiltersWrapper>
@@ -142,19 +149,26 @@ describe('The app ', () => {
       })
     })
 
-    const { findAllByTestId, findByTestId, debug, findByText } = setUpApp()
+    const { findByTestId, findByText, debug } = setUpApp({
+      initialEntries: ['/', `/products/${product1.id}`],
+      initialIndex: 1,
+    })
 
-    const [productTileImage1] = await findAllByTestId('ProductTileImage')
+    await waitFor(() => {
+      expect(mockedAxios.get).toHaveBeenCalledTimes(2)
+    })
 
-    fireEvent.click(productTileImage1)
-
-    // debug(await findByText(/add to cart/i))
+    // debug(await findByText(product1.price as any))
 
     expect(await findByTestId('CartButton')).toHaveTextContent('Cart (0)')
 
     fireEvent.click(await findByText(/add to cart/i))
 
-    // debug(await findByTestId('CartButton'))
+    await waitFor(() => {
+      expect(mockedAxios.post).toHaveBeenCalledTimes(1)
+    })
+
+    expect(await findByText(/remove from cart/i)).toBeInTheDocument()
 
     expect(await findByTestId('CartButton')).toHaveTextContent('Cart (1)')
   })
