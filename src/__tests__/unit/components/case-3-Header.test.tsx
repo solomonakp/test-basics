@@ -5,18 +5,28 @@ import { createStore } from '../../../store'
 
 import Header from '../../../components/Header'
 import { FiltersContext } from '../../../context/filters'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Link } from 'react-router-dom'
+import { notDeepEqual } from 'assert'
 
 describe('The Header component', () => {
   const defaultProps = {
     toggleShowingFilters: jest.fn(),
   }
-  const setUpHeader = (props = defaultProps) =>
+  const setUpHeader = (
+    props = defaultProps,
+    router = {
+      initialEntries: ['/', 'products'],
+      initialIndex: 0,
+    },
+  ) =>
     render(
       <FiltersContext.Provider value={{ ...props } as any}>
         <StoreProvider store={createStore()}>
-          <MemoryRouter>
+          <MemoryRouter {...router}>
             <Header />
+            {/* <Link to="/products" data-testid="link">
+              products
+            </Link> */}
           </MemoryRouter>
         </StoreProvider>
       </FiltersContext.Provider>,
@@ -34,5 +44,12 @@ describe('The Header component', () => {
     fireEvent.click(btn)
     expect(toggleShowingFilters).toHaveBeenCalled()
   })
-  it('❌shows the filter button only on the home page', () => {})
+  it('❌shows the filter button only on the home page', () => {
+    const { queryByText, getByTestId } = setUpHeader(undefined, {
+      initialEntries: ['/', 'products'],
+      initialIndex: 1,
+    })
+
+    expect(queryByText(/filter/i)).not.toBeInTheDocument()
+  })
 })

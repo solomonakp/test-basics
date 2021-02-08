@@ -3,11 +3,12 @@ import { Axios } from '../../helpers/axios'
 import { render, fireEvent, waitFor, act } from '@testing-library/react'
 import { Provider as StoreProvider } from 'react-redux'
 import { buildProduct } from '../utils'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 
 import App from '../../components/App'
 import { createStore } from '../../store'
 import { FiltersWrapper } from '../../components/FiltersWrapper'
+import { build } from '@jackfranklin/test-data-bot'
 jest.mock('../../helpers/axios')
 
 const mockedAxios = Axios as any
@@ -15,7 +16,7 @@ const mockedAxios = Axios as any
 const setUpApp = () =>
   render(
     <StoreProvider store={createStore()}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/']}>
         <FiltersWrapper>
           <App />
         </FiltersWrapper>
@@ -87,17 +88,76 @@ describe('The app ', () => {
       expect(queryAllByTestId('ProductTile')).toHaveLength(2)
     })
   })
-  test('❌it can navigate to the single product page', async () => {
-    mockedAxios.get.mockResolvedValueOnce({
-      data: [buildProduct(), buildProduct(), buildProduct()],
+  test('it can navigate to the single product page', async () => {
+    const product = buildProduct()
+
+    mockedAxios.get.mockImplementation((url) => {
+      return new Promise((resolve) => {
+        if (url === `products/${product.id}`) {
+          return resolve({ data: product })
+        }
+        return resolve({ data: [product] })
+      })
+    })
+    const { findByTestId, queryByText } = setUpApp()
+
+    fireEvent.click(await findByTestId('ProductTileImage'))
+
+    expect(mockedAxios.get).toHaveBeenCalledTimes(3)
+
+    await waitFor(() => {
+      expect(mockedAxios.get).toHaveBeenCalledTimes(3)
     })
 
-    const { findByTestId } = setUpApp()
-
-    await waitFor(() => {})
+    await waitFor(() => {
+      expect(queryByText(product.price as string)).toBeInTheDocument()
+    })
   })
 
-  test('❌it can add a product to cart', async () => {})
+  test('it can add a product to cart', async () => {
+    const [product1, product2] = [buildProduct(), buildProduct()]
+
+    mockedAxios.get.mockImplementation((url: string) => {
+      return new Promise((resolve) => {
+        if (url === `products/${product1.id}`) {
+          return resolve({
+            data: product1,
+          })
+        } else if (url === 'cart') {
+          return resolve({
+            data: [],
+          })
+        }
+        return resolve({
+          data: [product1, product2],
+        })
+      })
+    })
+
+    mockedAxios.post.mockImplementation(() => {
+      return new Promise((resolve) => {
+        return resolve({
+          data: [product1],
+        })
+      })
+    })
+
+    const { findAllByTestId, findByTestId, debug, findByText } = setUpApp()
+
+    const [productTileImage1] = await findAllByTestId('ProductTileImage')
+
+    fireEvent.click(productTileImage1)
+
+    // debug(await findByText(/add to cart/i))
+
+    expect(await findByTestId('CartButton')).toHaveTextContent('Cart (0)')
+
+    fireEvent.click(await findByText(/add to cart/i))
+
+    // debug(await findByTestId('CartButton'))
+
+    expect(await findByTestId('CartButton')).toHaveTextContent('Cart (1)')
+  })
 
   test('❌it can remove a product from cart', async () => {})
 
