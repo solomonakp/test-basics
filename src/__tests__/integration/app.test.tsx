@@ -173,7 +173,55 @@ describe('The app ', () => {
     expect(await findByTestId('CartButton')).toHaveTextContent('Cart (1)')
   })
 
-  test('❌it can remove a product from cart', async () => {})
+  test('it can remove a product from cart', async () => {
+    const [product1, product2] = [buildProduct(), buildProduct()]
+
+    mockedAxios.get.mockImplementation((url: string) => {
+      return new Promise((resolve) => {
+        if (url === `products/${product1.id}`) {
+          return resolve({
+            data: product1,
+          })
+        } else if (url === 'cart') {
+          return resolve({
+            data: [product1],
+          })
+        }
+        return resolve({
+          data: [product1, product2],
+        })
+      })
+    })
+
+    mockedAxios.delete.mockImplementation(() => {
+      return new Promise((resolve) => {
+        return resolve({
+          data: [],
+        })
+      })
+    })
+
+    const { findByTestId, findByText, debug } = setUpApp({
+      initialEntries: ['/', `/products/${product1.id}`],
+      initialIndex: 1,
+    })
+
+    await waitFor(() => {
+      expect(mockedAxios.get).toHaveBeenCalledTimes(2)
+    })
+
+    expect(await findByTestId('CartButton')).toHaveTextContent('Cart (1)')
+
+    fireEvent.click(await findByText(/remove from cart/i))
+
+    await waitFor(() => {
+      expect(mockedAxios.delete).toHaveBeenCalledTimes(1)
+    })
+
+    expect(await findByText(/add to cart/i)).toBeInTheDocument()
+
+    expect(await findByTestId('CartButton')).toHaveTextContent('Cart (0)')
+  })
 
   test('❌it can go through and complete the checkout flow', async () => {})
 })
