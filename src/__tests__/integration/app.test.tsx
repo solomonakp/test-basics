@@ -1,16 +1,21 @@
 import React from 'react'
-import { Axios } from '../../helpers/axios'
-import { render, fireEvent, waitFor, act } from '@testing-library/react'
+import {
+  render,
+  fireEvent,
+  waitFor,
+  act,
+  getByTestId,
+} from '@testing-library/react'
 import { Provider as StoreProvider } from 'react-redux'
 import { buildProduct } from '../utils'
-import { MemoryRouter, useLocation } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
+import Modal from 'react-modal'
 
+import { Axios } from '../../helpers/axios'
 import App from '../../components/App'
 import { createStore } from '../../store'
 import { FiltersWrapper } from '../../components/FiltersWrapper'
-import { build } from '@jackfranklin/test-data-bot'
-import { debug } from 'console'
-import { executionAsyncId } from 'async_hooks'
+
 jest.mock('../../helpers/axios')
 
 const mockedAxios = Axios as any
@@ -123,7 +128,6 @@ describe('The app ', () => {
 
   test('it can add a product to cart', async () => {
     const [product1, product2] = [buildProduct(), buildProduct()]
-
     mockedAxios.get.mockImplementation((url: string) => {
       return new Promise((resolve) => {
         if (url === `products/${product1.id}`) {
@@ -144,7 +148,7 @@ describe('The app ', () => {
     mockedAxios.post.mockImplementation(() => {
       return new Promise((resolve) => {
         return resolve({
-          data: [product1],
+          data: [product1, product2],
         })
       })
     })
@@ -223,5 +227,99 @@ describe('The app ', () => {
     expect(await findByTestId('CartButton')).toHaveTextContent('Cart (0)')
   })
 
-  test('❌it can go through and complete the checkout flow', async () => {})
+  test.only('it can go through and complete the checkout flow', async () => {
+    Modal.setAppElement(document.createElement('div'))
+
+    const [product1, product2] = [
+      {
+        ...buildProduct(),
+        priceUnformatted: 3000,
+      },
+      {
+        ...buildProduct(),
+        priceUnformatted: 2000,
+      },
+    ]
+
+    mockedAxios.get.mockImplementation((url: string) => {
+      return new Promise((resolve) => {
+        if (url === `products/${product1.id}`) {
+          return resolve({
+            data: product1,
+          })
+        } else if (url === 'cart') {
+          return resolve({
+            data: [product1, product2],
+          })
+        }
+        return resolve({
+          data: [product1, product2],
+        })
+      })
+    })
+
+    mockedAxios.post.mockImplementation(() => {
+      return new Promise((resolve) => {
+        return resolve({
+          data: 'success',
+        })
+      })
+    })
+
+    const { findByTestId, debug, getByText, getByTestId } = setUpApp({
+      initialEntries: ['/', `/products/${product1.id}`],
+      initialIndex: 1,
+    })
+
+    await waitFor(() => {
+      expect(mockedAxios.get).toHaveBeenCalledTimes(2)
+    })
+
+    expect(await findByTestId('CartButton')).toHaveTextContent('Cart (2)')
+    expect(getByText(/remove from cart/i)).toBeInTheDocument()
+
+    const test_stripe_token = 'test_stripe_token'
+
+    const createToken = jest
+      .fn()
+      .mockResolvedValue({ error: null, token: test_stripe_token })
+
+    window.Stripe = jest.fn().mockReturnValue({
+      createToken,
+      elements: jest.fn().mockReturnValue({
+        create: jest.fn().mockReturnValue({
+          on: jest.fn(),
+          mount: jest.fn(),
+          destroy: jest.fn(),
+          update: jest.fn(),
+        }),
+      }),
+    }) as any
+
+    fireEvent.click(getByText('Cart (2)'))
+
+    expect(getByTestId('checkoutButton')).toHaveTextContent('Checkout $50')
+
+    fireEvent.click(await getByTestId('checkoutButton'))
+
+    expect(getByText('Checkout $50')).toBeInTheDocument()
+
+    fireEvent.click(getByText(/place order/i))
+
+    await waitFor(() => {
+      expect(createToken).toHaveBeenCalledTimes(1)
+    })
+
+    await waitFor(() => {
+      expect(mockedAxios.post).toHaveBeenCalledWith('checkout', {
+        token: test_stripe_token,
+      })
+    })
+
+    expect(await findByTestId('CartButton')).toHaveTextContent('Cart (0)')
+
+    expect(await findByTestId('FilterButton')).toBeInTheDocument()
+
+    debug()
+  })
 })

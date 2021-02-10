@@ -42773,6 +42773,7 @@ var Cart = function Cart() {
       }
     }, "Remove from Cart"));
   })), /*#__PURE__*/_react.default.createElement(CheckoutButtonWrapper, null, /*#__PURE__*/_react.default.createElement(CheckoutButton, {
+    "data-testid": "checkoutButton",
     onClick: function onClick() {
       return setCheckingOut(true);
     }
@@ -44287,7 +44288,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52253" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61721" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
